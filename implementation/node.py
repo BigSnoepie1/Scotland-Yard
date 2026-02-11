@@ -16,6 +16,13 @@ class node:
         self._metro_connections = metro_connections
         self._boat_connections = boat_connections
 
+    def __str__(self) -> str:
+        return f"id: {self._station_id}, taxi: {self._taxi_connections}, bus: {self._bus_connections}, boat: {self._boat_connections}"
+
+    @property
+    def station_id(self) -> int:
+        return self._station_id
+
     def add_connections(
         self, connecting_nodes: list[node], connection_type: str
     ) -> None:
