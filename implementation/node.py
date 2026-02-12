@@ -17,7 +17,11 @@ class node:
         self._boat_connections = boat_connections
 
     def __str__(self) -> str:
-        return f"id: {self._station_id}, taxi: {self._taxi_connections}, bus: {self._bus_connections}, boat: {self._boat_connections}"
+        taxi_connections = []
+        for taxi in self._taxi_connections:
+            taxi_connections.append(taxi.station_id)
+        print(sorted(taxi_connections))
+        return f"id: {self._station_id}, taxi: {len(self._taxi_connections)}, bus: {len(self._bus_connections)}, metro: {len(self._metro_connections)} boat: {len(self._boat_connections)}"
 
     @property
     def station_id(self) -> int:
@@ -26,7 +30,8 @@ class node:
     def add_connections(
         self, connecting_nodes: list[node], connection_type: str
     ) -> None:
-        match connection_type:
+        print(self.station_id)
+        match connection_type.lower():
             case "taxi":
                 self._taxi_connections.extend(connecting_nodes)
             case "bus":
