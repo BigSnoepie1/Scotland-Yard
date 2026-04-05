@@ -1,95 +1,167 @@
-from implementation.node import node
+from collections import defaultdict
+
+from implementation.node import Node
 
 
-class board:
+class Board:
     def __init__(self, game_info: str) -> None:
         self._game_info = game_info
-        self._game_data = []
+        self._stations = []
+        self._generate_game()
 
-    def _generate_dict(self, data: list[str]) -> dict[str, str]:
-        if len(data) != 4:
-            raise ValueError("Needs exactly 4 elements")
-        return {
-            "Taxi": data[0],
-            "Bus": data[1],
-            "Metro": data[2],
-            "Boat": data[3],
-        }
+    class _LinesIterator:
+        def __init__(self, file_path: str):
+            self._current_index = 0
+            self._separated_lines = []
+            with open(file_path) as file:
+                for line in file:
+                    line_segments = line.split(";")
+                    self._separated_lines.append(line_segments)
 
-    def _convert_game_string(self, numbers: list[str]) -> list[int]:
-        newlist = []
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            i = self._current_index
+            if i >= len(self._separated_lines):
+                raise StopIteration
+            else:
+                self._current_index += 1
+                return self._separated_lines[i]
+
+    def _generate_game(self):
+        self._extract_common_info()
+        self._add_stations()
+        self._add_connections()
+
+    def _extract_common_info(self) -> None:
+        for line_segments in self._LinesIterator(self._game_info):
+            if line_segments[0] == "Starting positions:":
+                self._starting_positions = self._convert_game_string(
+                    line_segments[1:]
+                )
+            elif line_segments[0] == "Starting tickets:":
+                self._starting_tickets = defaultdict(int)
+                self._starting_tickets["Taxi"] = int(line_segments[1])
+                self._starting_tickets["Bus"] = int(line_segments[2])
+                self._starting_tickets["Metro"] = int(line_segments[3])
+            else:
+                break
+
+    def _add_stations(self) -> None:
+        for line_segments in self._LinesIterator(self._game_info):
+            if line_segments[0] in {
+                "Starting positions:",
+                "Starting tickets:",
+            }:
+                continue
+            else:
+                self._stations.append(Node(int(line_segments[0])))
+
+    def _add_connections(self) -> None:
+        for line_segments in self._LinesIterator(self._game_info):
+            if line_segments[0] in {
+                "Starting positions:",
+                "Starting tickets:",
+            }:
+                continue
+            else:
+                id, taxi, bus, metro, boat = line_segments
+                station = self._smart_station_finder(int(id))
+                taxi = self._convert_game_string(taxi)
+                bus = self._convert_game_string(bus)
+                metro = self._convert_game_string(metro)
+                boat = self._convert_game_string(boat)
+                if len(taxi) > 0:
+                    station.add_connections(
+                        self._indices_to_nodes(taxi), "taxi"
+                    )
+                if len(bus) > 0:
+                    station.add_connections(self._indices_to_nodes(bus), "bus")
+                if len(metro) > 0:
+                    station.add_connections(
+                        self._indices_to_nodes(metro), "metro"
+                    )
+                if len(boat) > 0:
+                    station.add_connections(
+                        self._indices_to_nodes(boat), "boat"
+                    )
+
+    def _convert_game_string(self, numbers: str | list[str]) -> list[int]:
+        return_list = []
+        if isinstance(numbers, str):
+            numbers = numbers.split(",")
         for item in numbers:
             new_item = item.replace("\n", "")
             if len(new_item) > 0:
-                newlist.append(int(new_item))
-            else:
-                newlist.append(None)
-        return newlist
+                return_list.append(int(new_item))
+        return return_list
 
-    def _open_game(self) -> list[tuple[str, dict[str, str]]]:
-        game_data = []
-        with open(self._game_info) as file:
-            for line in file:
-                line_segments = line.split(";")
-                if line_segments[0] == "Starting positions:":
-                    self._starting_positions = self._convert_game_string(
-                        line_segments[1:]
-                    )
-                elif line_segments[0] == "Starting tickets:":
-                    data = line_segments[1:]
-                    data.append("")
-                    self._starting_tickets = self._generate_dict(data)
-
-                else:
-                    game_data.append(
-                        (
-                            line_segments[0],
-                            self._generate_dict(line_segments[1:]),
-                        )
-                    )
-        return game_data
-
-    def _get_location(self, node_id: int) -> node:
-        for location in self._locations:
-            if location.station_id == node_id:
-                break
+    def _smart_station_finder(self, id: int) -> Node:
+        if id < len(self._stations):
+            current_candidate = self._stations[id]
         else:
-            raise ValueError(f"Location {node_id} does not exist")
-        return location
+            current_candidate = self._stations[id - 1]
+        if current_candidate.station_id == id:
+            return current_candidate
+        offset = 1
+        while True:
+            error_count = 0
+            lower_id = id - offset
+            if lower_id >= 0:
+                current_candidate = self._stations[lower_id]
+                if current_candidate.station_id == id:
+                    return current_candidate
+            else:
+                error_count += 1
 
-    def _generate_connections(
-        self, connection_data: tuple[str, dict[str, str]]
-    ) -> None:
-        current_station_id, connections = connection_data
-        current_station_id = int(current_station_id)
-        current_station = self._get_location(current_station_id)
-        for type, connections in connections.items():
-            connection_list = connections.split(",")
-            connection_list = self._convert_game_string(connection_list)
-            other_stations = []
-            for other_station_id in connection_list:
-                if other_station_id is not None:
-                    other_stations.append(self._get_location(other_station_id))
-                else:
-                    break
-            current_station.add_connections(other_stations, type)
+            upper_id = id + offset
+            if upper_id <= len(self._stations) - 1:
+                current_candidate = self._stations[upper_id]
+                if current_candidate.station_id == id:
+                    return current_candidate
+            else:
+                error_count += 1
 
-    def _generate_nodes(
-        self, game_data: list[tuple[str, dict[str, str]]]
-    ) -> None:
-        self._locations = set()
-        for datapoint in game_data:
-            self._locations.add(node(int(datapoint[0])))
-        for datapoint in game_data:
-            self._generate_connections(datapoint)
+            if error_count >= 2:
+                raise ValueError(f"Station {id} does not exist")
 
-    def generate_game(self) -> None:
-        game_data = self._open_game()
-        self._generate_nodes(game_data)
+            offset += 1
+
+    def _indices_to_nodes(self, indices: list[int]) -> list[Node]:
+        nodes = []
+        for i in indices:
+            nodes.append(self._smart_station_finder(i))
+        return nodes
 
     def _test_data(self) -> bool:
-        pass
+        for station in self._stations:
+            id = station.station_id
+            if len(station._taxi_connections) > 0:
+                for taxi in station._taxi_connections:
+                    if station not in taxi._taxi_connections:
+                        raise LookupError(
+                            f"{id} points to {station.station_id}, but not the other way around"
+                        )
+            if len(station._bus_connections) > 0:
+                for bus in station._bus_connections:
+                    if station not in bus._bus_connections:
+                        raise LookupError(
+                            f"{id} points to {station.station_id}, but not the other way around"
+                        )
+            if len(station._metro_connections) > 0:
+                for metro in station._metro_connections:
+                    if station not in metro._metro_connections:
+                        raise LookupError(
+                            f"{id} points to {station.station_id}, but not the other way around"
+                        )
+            if len(station._boat_connections) > 0:
+                for boat in station._boat_connections:
+                    if station not in boat._boati_connections:
+                        raise LookupError(
+                            f"{id} points to {station.station_id}, but not the other way around"
+                        )
 
     def print_board(self) -> None:
-        for location in self._locations:
+        for location in self._stations:
             print(location)
