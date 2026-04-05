@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from helper.helper import AsymmetricNodeError, SelfReferencingError
 from implementation.node import Node
 
 
@@ -139,28 +140,31 @@ class Board:
             id = station.station_id
             if len(station._taxi_connections) > 0:
                 for taxi in station._taxi_connections:
+                    if station == taxi:
+                        raise SelfReferencingError(id, "taxi")
                     if station not in taxi._taxi_connections:
-                        raise LookupError(
-                            f"{id} points to {station.station_id}, but not the other way around"
-                        )
+                        raise AsymmetricNodeError(id, taxi.station_id, "taxi")
             if len(station._bus_connections) > 0:
                 for bus in station._bus_connections:
+                    if station == bus:
+                        raise SelfReferencingError(id, "bus")
                     if station not in bus._bus_connections:
-                        raise LookupError(
-                            f"{id} points to {station.station_id}, but not the other way around"
-                        )
+                        raise AsymmetricNodeError(id, bus.station_id, "bus")
             if len(station._metro_connections) > 0:
                 for metro in station._metro_connections:
+                    if station == metro:
+                        raise SelfReferencingError(id, "metro")
                     if station not in metro._metro_connections:
-                        raise LookupError(
-                            f"{id} points to {station.station_id}, but not the other way around"
+                        raise AsymmetricNodeError(
+                            id, metro.station_id, "metro"
                         )
             if len(station._boat_connections) > 0:
                 for boat in station._boat_connections:
-                    if station not in boat._boati_connections:
-                        raise LookupError(
-                            f"{id} points to {station.station_id}, but not the other way around"
-                        )
+                    if station == boat:
+                        raise SelfReferencingError(id, "boat")
+                    if station not in boat._boat_connections:
+                        raise AsymmetricNodeError(id, boat.station_id, "boat")
+        print("All point to each other")
 
     def print_board(self) -> None:
         for location in self._stations:

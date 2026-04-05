@@ -30,7 +30,6 @@ class Node:
     def add_connections(
         self, connecting_nodes: list[Node], connection_type: str
     ) -> None:
-        print(self.station_id)
         match connection_type.lower():
             case "taxi":
                 self._taxi_connections = connecting_nodes

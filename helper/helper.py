@@ -1,3 +1,15 @@
+class AsymmetricNodeError(Exception):
+    def __init__(self, root, other, transporttype) -> None:
+        self.message = f"{root} points to {other} using {transporttype}, but not the other way around"
+        super().__init__(self.message)
+
+
+class SelfReferencingError(Exception):
+    def __init__(self, root, transporttype) -> None:
+        self.message = f"{root} points to itself using{transporttype}"
+        super().__init__(self.message)
+
+
 starting_positions = [
     138,
     26,
