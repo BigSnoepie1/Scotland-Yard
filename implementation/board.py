@@ -135,7 +135,7 @@ class Board:
             nodes.append(self._smart_station_finder(i))
         return nodes
 
-    def _test_data(self) -> bool:
+    def _test_data(self) -> None:
         for station in self._stations:
             id = station.station_id
             if len(station._taxi_connections) > 0:
