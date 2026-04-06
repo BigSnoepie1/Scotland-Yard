@@ -22,6 +22,7 @@ class Game:
     ) -> None:
         self._board = Board(game_info_path)
         self._generate_players(number_of_detectives)
+        self._test_board()
 
     def _generate_players(self, number_of_detectives: int):
         possible_starting_places = self._board._starting_positions.copy()
@@ -47,3 +48,7 @@ class Game:
                     starting_tickets["Black"],
                 )
             )
+
+    def _test_board(self) -> None:
+        if self._board.test_data():
+            print("Board succesfully initialized!")

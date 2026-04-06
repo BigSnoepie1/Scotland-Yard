@@ -135,7 +135,7 @@ class Board:
             nodes.append(self._smart_station_finder(i))
         return nodes
 
-    def _test_data(self) -> None:
+    def test_data(self) -> bool:
         for station in self._stations:
             id = station.station_id
             if len(station._taxi_connections) > 0:
@@ -164,7 +164,7 @@ class Board:
                         raise SelfReferencingError(id, "boat")
                     if station not in boat._boat_connections:
                         raise AsymmetricNodeError(id, boat.station_id, "boat")
-        print("All point to each other")
+        return True
 
     def print_board(self) -> None:
         for location in self._stations:

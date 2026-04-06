@@ -14,12 +14,10 @@ def get_setup_input():
 def main():
     number_of_detectives = get_setup_input()
     test_game = game.Game(number_of_detectives, "game_info/game_info.txt")
-    print(test_game._board._starting_positions)
-    print(test_game._board._starting_tickets)
-    test_game._board.print_board()
-    test_game._board._test_data()
-    print(test_game._detectives)
-    print(test_game._mister_X)
+    
+
+    test_game._board.test_data()
+
 
 
 if __name__ == "__main__":
