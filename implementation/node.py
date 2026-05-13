@@ -20,7 +20,6 @@ class Node:
         taxi_connections = []
         for taxi in self._taxi_connections:
             taxi_connections.append(taxi.station_id)
-        # print(sorted(taxi_connections))
         return f"id: {self._station_id}, taxi: {len(self._taxi_connections)}, bus: {len(self._bus_connections)}, metro: {len(self._metro_connections)} boat: {len(self._boat_connections)}"
 
     @property
