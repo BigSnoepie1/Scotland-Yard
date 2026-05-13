@@ -135,6 +135,25 @@ class Board:
             nodes.append(self._smart_station_finder(i))
         return nodes
 
+    def get_connections(self, location: int) -> dict[str, list[int]]:
+        station = self._smart_station_finder(location)
+        connections = {"taxi": [], "bus": [], "metro": [], "boat": []}
+        taxi_connections = station.get_connecting_stations("taxi")
+        bus_connections = station.get_connecting_stations("bus")
+        metro_connections = station.get_connecting_stations("metro")
+        boat_connections = station.get_connecting_stations("boat")
+
+        for connection in taxi_connections:
+            connections["taxi"].append(connection.station_id)
+        for connection in metro_connections:
+            connections["bus"].append(connection.station_id)
+        for connection in bus_connections:
+            connections["metro"].append(connection.station_id)
+        for connection in boat_connections:
+            connections["boat"].append(connection.station_id)
+
+        return connections
+
     def test_data(self) -> bool:
         for station in self._stations:
             id = station.station_id

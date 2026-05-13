@@ -38,3 +38,17 @@ class Node:
                 self._metro_connections = connecting_nodes
             case "boat":
                 self._boat_connections = connecting_nodes
+
+    def get_connecting_stations(self, transport_type: str) -> list[Node]:
+        match transport_type:
+            case "taxi":
+                connections = self._taxi_connections
+            case "bus":
+                connections = self._bus_connections
+            case "metro":
+                connections = self._metro_connections
+            case "boat":
+                connections = self._boat_connections
+            case _:
+                raise ValueError("Connection type does not exist")
+        return connections

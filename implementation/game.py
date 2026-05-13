@@ -62,7 +62,7 @@ class Game:
 
     def move(
         self, destination: int, transport_type: str, detective_number=None
-    ):
+    ) -> bool:
         if detective_number:
             player = self._detectives[detective_number]
         else:
@@ -71,23 +71,43 @@ class Game:
         if self.check_space_occupation(destination):
             return False
 
+        connections = self._board.get_connections(player.location)
+
         match transport_type:
             case "taxi":
-                if player.taxi_tickets <= 0:
+                if (
+                    player.taxi_tickets <= 0
+                    or destination not in connections["taxi"]
+                ):
                     return False
                 player.taxi_tickets -= 1
+
             case "bus":
-                if player.bus_tickets <= 0:
+                if (
+                    player.bus_tickets <= 0
+                    or destination not in connections["bus"]
+                ):
                     return False
                 player.bus_tickets -= 1
+
             case "metro":
-                if player.metro_tickets <= 0:
+                if (
+                    player.metro_tickets <= 0
+                    or destination not in connections["metro"]
+                ):
                     return False
                 player.metro_tickets -= 1
+
             case "boat":
-                if player.black_tickets <= 0:
+                if (
+                    player.black_tickets <= 0
+                    or destination not in connections["boat"]
+                ):
                     return False
                 player.black_tickets -= 1
+
+        player.location = destination
+        return True
 
     def _test_board(self) -> None:
         if self._board.test_data():
