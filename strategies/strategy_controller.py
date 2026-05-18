@@ -4,13 +4,16 @@ from strategies import strategy
 
 class GameController:
     def __init__(
-        self, board: board.Board, strategy: strategy.Strategy | None = None
+        self, game: game.Game, strategy: strategy.Strategy | None = None
     ) -> None:
-        self._board = board
+        self._game = game
         self._strategy = strategy
+        self._current_move = 1
+        self._visible_moves = [3, 8, 13, 18]
 
     def get_possible_mister_x_locations(self) -> int:
-        pass
+        mister_x_history = self._game._mister_x_history
+        detective_history = self._game._detectives_history
 
     def move_manual(self, detective_id, goal) -> None:
         pass

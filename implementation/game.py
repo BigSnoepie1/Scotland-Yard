@@ -35,7 +35,7 @@ class Game:
         self._mister_X = Player(
             mister_X_start, 1000, 1000, 1000, number_of_detectives
         )
-        self._mister_x_history.append(mister_X_start)
+        self._mister_x_history.append((mister_X_start, "start"))
         starting_tickets = self._board._starting_tickets
         for i in range(number_of_detectives):
             starting_position = possible_starting_places.pop(
