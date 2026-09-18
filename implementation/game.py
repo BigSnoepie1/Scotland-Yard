@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from implementation.board import Board
 from implementation.node import Node
+from strategies.strategy import Strategy
 
 
 @dataclass
@@ -20,8 +21,15 @@ class Game:
         self,
         number_of_detectives: int,
         game_info_path: str = "game_info/game_info.txt",
+        strategy: Strategy | None = None,
     ) -> None:
         self._board = Board(game_info_path)
+        self._strategy = strategy
+        self._current_move = 1
+        self._visible_moves = [3, 8, 13, 18]
+
+    def play(self, rounds_limit: int = 30) -> None:
+        pass
 
     def get_possible_mister_x_locations(self) -> list[int]:
         pass
