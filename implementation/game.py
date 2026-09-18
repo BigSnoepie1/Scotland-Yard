@@ -25,17 +25,48 @@ class Game:
     ) -> None:
         self._board = Board(game_info_path)
         self._strategy = strategy
+        self._mister_x_history = []
+        self._detectives_history = []
         self._current_move = 1
         self._visible_moves = [3, 8, 13, 18]
 
     def play(self, rounds_limit: int = 30) -> None:
-        pass
+        while self._current_move < rounds_limit:
+            pass
 
     def get_possible_mister_x_locations(self) -> list[int]:
         pass
 
     def move_player(self):
         pass
+
+    def _setup_players(self, number_of_detectives: int) -> None:
+        possible_starting_places = self._board._starting_positions.copy()
+        mister_X_start = possible_starting_places.pop(
+            random.randrange(len(possible_starting_places))
+        )
+        self._mister_X = Player(
+            mister_X_start, 1000, 1000, 1000, number_of_detectives, 2
+        )
+        self._mister_x_history.append(("start", mister_X_start))
+
+        starting_tickets = self._board._starting_tickets
+        self._detectives = []
+        for i in range(number_of_detectives):
+            starting_position = possible_starting_places.pop(
+                random.randrange(len(possible_starting_places))
+            )
+            self._detectives_history.append([starting_position])
+            self._detectives.append(
+                Player(
+                    starting_position,
+                    starting_tickets["Taxi"],
+                    starting_tickets["Bus"],
+                    starting_tickets["Metro"],
+                    starting_tickets["Black"],
+                    0,
+                )
+            )
 
 
 # class Game:
